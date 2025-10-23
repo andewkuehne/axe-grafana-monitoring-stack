@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miner IP Manager</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        textarea { width: 100%; height: 200px; font-size: 1.1em; }
+        input[type=submit] { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; font-size: 1em; }
+    </style>
+</head>
+<body>
+    <h1>Miner IP Manager</h1>
+    <p>Enter one miner IP address per line.</p>
+    <form method="POST">
+        <textarea name="ips">{{ ips_text }}</textarea>
+        <br><br>
+        <input type="submit" value="Save IP List">
+    </form>
+</body>
+</html>

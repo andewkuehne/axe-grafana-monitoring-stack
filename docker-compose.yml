@@ -31,46 +31,30 @@ services:
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
     restart: unless-stopped
 
-  # --- TELEGRAF SERVICE ADDED ---
   telegraf:
     image: telegraf:latest
     container_name: telegraf
     restart: unless-stopped
     depends_on:
       - influxdb
+      - miner-manager
     volumes:
-      # Mount your telegraf.conf file from the host
-      # This file must be in a 'telegraf' directory next to this docker-compose.yaml
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     environment:
-      # Pass the InfluxDB token from your .env file to the container
-      # The telegraf.conf file will use this variable
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
+  miner-manager:
+    build: ./miner-manager
+    container_name: miner-manager
     ports:
-      - "9090:9090"
+      - "5001:5000" 
     volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus-data:/prometheus
+      - miner-manager-data:/app/data 
     restart: unless-stopped
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-
-  # --- INDENTATION CORRECTED FOR JSON-EXPORTER ---
-  json-exporter:
-      ports:
-        - "7979:7979"
-      volumes:
-        - ./jsonexporter/config/:/config/
-      image: quay.io/prometheuscommunity/json-exporter
-      restart: unless-stopped
-      command: --config.file=/config/config.yml
-
 
 volumes:
   influxdb-data:
   grafana-data:
-  prometheus-data:
+  miner-manager-data: 
