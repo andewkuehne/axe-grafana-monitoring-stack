@@ -1,4 +1,4 @@
-# Axe Miner Monitoring Stack
+# Axe Miner Monitoring Stack - Still a work in progress (needs dashboards)
 
 A Docker-based monitoring solution for Axe-compatible miners using a dynamic IP manager, InfluxDB, and Grafana.
 
