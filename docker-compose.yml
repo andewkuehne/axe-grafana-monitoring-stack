@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=${DOCKER_GRAFANA_INIT_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${DOCKER_GRAFANA_INIT_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+    restart: unless-stopped
+
+  # --- TELEGRAF SERVICE ADDED ---
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    volumes:
+      # Mount your telegraf.conf file from the host
+      # This file must be in a 'telegraf' directory next to this docker-compose.yaml
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    environment:
+      # Pass the InfluxDB token from your .env file to the container
+      # The telegraf.conf file will use this variable
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  # --- INDENTATION CORRECTED FOR JSON-EXPORTER ---
+  json-exporter:
+      ports:
+        - "7979:7979"
+      volumes:
+        - ./jsonexporter/config/:/config/
+      image: quay.io/prometheuscommunity/json-exporter
+      restart: unless-stopped
+      command: --config.file=/config/config.yml
+
+
+volumes:
+  influxdb-data:
+  grafana-data:
+  prometheus-data:
