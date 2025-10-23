@@ -39,7 +39,7 @@ This project provides a ready-to-use monitoring stack for Axe miners (such as Ne
 
     ```bash
     # On Linux/macOS
-    cp env.txt .env
+    cp env.example .env
     ```
 
 3.  **Start the services:**
